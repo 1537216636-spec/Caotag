@@ -14,7 +14,5 @@ workflows:
         script: |
           flutter build ipa --release \
             --export-method ad-hoc \
-            --team-id <你的Team ID> \
-            --bundle-id <你的Bundle ID>
     artifacts:
       - build/ios/ipa/*.ipa
