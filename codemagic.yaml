@@ -1,0 +1,17 @@
+workflows:
+  android-release:
+    name: Android Release Build
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set Gradle memory
+        script: |
+          echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m" >> android/gradle.properties
+          echo "org.gradle.parallel=true" >> android/gradle.properties
+          echo "org.gradle.caching=true" >> android/gradle.properties
+      - name: Build AAB
+        script: flutter build appbundle --release
+    artifacts:
+      - build/app/outputs/bundle/release/app-release.aab
