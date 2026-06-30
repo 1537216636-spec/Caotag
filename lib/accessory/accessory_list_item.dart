@@ -28,9 +28,9 @@ class AccessoryListItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Material(
         borderRadius: BorderRadius.circular(14),
-        color: theme.colorScheme.surface,
+        color: const Color(0xFF161B22), // 暗色卡片背景
         elevation: 0,
-        shadowColor: theme.shadowColor.withOpacity(0.08),
+        shadowColor: Colors.black.withOpacity(0.2),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: onTap,
@@ -50,7 +50,9 @@ class AccessoryListItem extends StatelessWidget {
                     children: [
                       Text(
                         accessory.name,
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -58,7 +60,7 @@ class AccessoryListItem extends StatelessWidget {
                       if (accessory.datePublished != null)
                         Text(
                           DateFormat('MM/dd HH:mm').format(accessory.datePublished!),
-                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                          style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
                         ),
                       if (lastLocation != null)
                         FutureBuilder<Placemark?>(
@@ -74,15 +76,15 @@ class AccessoryListItem extends StatelessWidget {
                               if (address.isNotEmpty) {
                                 return Text(
                                   address,
-                                  style: theme.textTheme.bodySmall,
-                                  maxLines: 2,   // 允许两行
+                                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                                  maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 );
                               }
                             }
                             return Text(
                               '${lastLocation.latitude.toStringAsFixed(4)}, ${lastLocation.longitude.toStringAsFixed(4)}',
-                              style: theme.textTheme.bodySmall,
+                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             );

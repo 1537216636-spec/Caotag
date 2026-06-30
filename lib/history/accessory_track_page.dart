@@ -159,6 +159,10 @@ class _AccessoryTrackPageState extends State<AccessoryTrackPage> {
                   urlTemplate:
                   'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
                   subdomains: ['1', '2', '3', '4'],
+                  backgroundColor: const Color(0xFFF5F5F5),
+                  maxZoom: 18,
+                  minZoom: 3,
+                  keepBuffer: 4,
                 ),
                 PolylineLayer(
                   polylines: [
@@ -226,7 +230,7 @@ class _AccessoryTrackPageState extends State<AccessoryTrackPage> {
           width: 24,
           height: 24,
           child: Transform.rotate(
-            angle: bearing,   // 箭头默认朝上（北），直接使用方位角即可
+            angle: bearing,
             child: CustomPaint(
               size: const Size(24, 24),
               painter: ArrowPainter(color: Colors.redAccent),

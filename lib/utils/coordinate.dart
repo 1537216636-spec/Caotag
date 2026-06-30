@@ -42,30 +42,29 @@ class CoordinateConverter {
     return [mgLon, mgLat];
   }
 
+  static List<double> gcj02ToWgs84(double lon, double lat) {
+    if (_outOfChina(lon, lat)) {
+      return [lon, lat];
+    }
+    const double ee = 0.00669342162296594323;
+    double mgLon = lon;
+    double mgLat = lat;
+    double dLon, dLat;
+    int maxIter = 10;
+    while (maxIter-- > 0) {
+      List<double> convert = wgs84ToGcj02(mgLon, mgLat);
+      dLon = convert[0] - lon;
+      dLat = convert[1] - lat;
+      if (dLon.abs() < 1e-7 && dLat.abs() < 1e-7) {
+        break;
+      }
+      mgLon -= dLon;
+      mgLat -= dLat;
+    }
+    return [mgLon, mgLat];
+  }
+
   static bool _outOfChina(double lon, double lat) {
     return lon < 72.004 || lon > 137.8347 || lat < 0.8293 || lat > 55.8271;
   }
-
-/// GCJ-02 转 WGS-84 (迭代法)
-static List<double> gcj02ToWgs84(double lon, double lat) {
-if (_outOfChina(lon, lat)) {
-return [lon, lat];
-}
-const double ee = 0.00669342162296594323;
-double mgLon = lon;
-double mgLat = lat;
-double dLon, dLat;
-int maxIter = 10;
-while (maxIter-- > 0) {
-List<double> convert = wgs84ToGcj02(mgLon, mgLat);
-dLon = convert[0] - lon;
-dLat = convert[1] - lat;
-if (dLon.abs() < 1e-7 && dLat.abs() < 1e-7) {
-break;
-}
-mgLon -= dLon;
-mgLat -= dLat;
-}
-return [mgLon, mgLat];
-}
 }

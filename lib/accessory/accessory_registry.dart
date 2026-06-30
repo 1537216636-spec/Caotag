@@ -51,7 +51,7 @@ class AccessoryRegistry extends ChangeNotifier {
       _accessories = [];
     }
 
-    // 自动转换旧坐标，确保所有位置为 GCJ-02
+    // 自动转换旧坐标，并直接设置（避免二次转换）
     for (var a in _accessories) {
       if (a.locationHistory.isNotEmpty) {
         a.locationHistory = a.locationHistory.map((pair) {
@@ -65,7 +65,7 @@ class AccessoryRegistry extends ChangeNotifier {
         a.setLastLocationGCJ(LatLng(gcj[1], gcj[0]), a.datePublished ?? DateTime.now());
       }
     }
-    await _storeAccessories(); // 保存转换后的数据
+    await _storeAccessories();
 
     _globalKeys = [];
     loading = false;
@@ -125,6 +125,7 @@ class AccessoryRegistry extends ChangeNotifier {
           final time = DateTime.fromMillisecondsSinceEpoch(
               ((map['timestamp'] as num).toInt()) * 1000);
 
+          // addLocationPoint 内部会调用 wgs84ToGcj02 转换
           matched.addLocationPoint(wgsPoint, time);
         }
       }
@@ -133,6 +134,7 @@ class AccessoryRegistry extends ChangeNotifier {
         a.locationHistory.sort((a, b) => b.b.compareTo(a.b));
         if (a.locationHistory.isNotEmpty) {
           final latest = a.locationHistory.first;
+          // 历史点已经转换过，直接设置 GCJ-02 坐标
           a.setLastLocationGCJ(latest.a, latest.b);
         }
       }

@@ -12,7 +12,7 @@ import Photos
 
 // Source: https://pub.dev/packages/receive_sharing_intent
 class ShareViewController: SLComposeServiceViewController {
-    let hostAppBundleIdentifier = "de.seemoo.ios.openhaystack"
+    let hostAppBundleIdentifier = "com.weikang.yourapp"
     let sharedKey = "ShareKey"
     var sharedMedia: [SharedMediaFile] = []
     var sharedText: [String] = []

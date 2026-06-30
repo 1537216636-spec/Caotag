@@ -1,76 +1,144 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:openhaystack_mobile/accessory/accessory_icon_model.dart';
 
-typedef IconChangeListener = void Function(String? newValue);
+class AccessoryIconSelector {
+  static Future<String?> showIconSelection(
+      BuildContext context, String currentIcon, Color currentColor) async {
+    final categories = AccessoryIconModel.getIconsByCategory();
+    String? selectedIcon = currentIcon;
 
-class AccessoryIconSelector extends StatelessWidget {
-  /// The existing icon used previously.
-  final String icon;
-  /// The existing color used previously.
-  final Color color;
-  /// A callback being called when the icon changes.
-  final IconChangeListener iconChanged;
-
-  /// This show an icon selector.
-  /// 
-  /// The icon can be selected from a list of available icons.
-  /// The icons are handled by the cupertino icon names.
-  const AccessoryIconSelector({
-    Key? key,
-    required this.icon,
-    required this.color,
-    required this.iconChanged,
-  }) : super(key: key);
-
-  /// Displays the icon selector with the [currentIcon] preselected in the [highlighColor].
-  /// 
-  /// The selected icon as a cupertino icon name is returned if the user selects an icon.
-  /// Otherwise the selection is discarded and a null value is returned.
-  static Future<String?> showIconSelection(BuildContext context, String currentIcon, Color highlighColor) async {
-  return await showDialog<String>(
-    context: context,
-    builder: (BuildContext context) {
-      return LayoutBuilder(
-        builder: (context, constraints) => Dialog(
-          child: GridView.count(
-            primary: false,
-            padding: const EdgeInsets.all(20),
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            shrinkWrap: true,
-            crossAxisCount: min((constraints.maxWidth / 80).floor(), 8),
-            semanticChildCount: AccessoryIconModel.icons.length,
-            children: AccessoryIconModel.icons
-              .map((value) => IconButton(
-                icon: Icon(AccessoryIconModel.mapIcon(value)),
-                color: value == currentIcon ? highlighColor : null,
-                onPressed: () { Navigator.pop(context, value); },
-              )).toList(),
-          ),
-        ),
-      );
-    }
-  );
-}
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color.fromARGB(255, 200, 200, 200),
-        shape: BoxShape.circle,
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: IconButton(
-        onPressed: () async {
-          String? selectedIcon = await showIconSelection(context, icon, color);
-          if (selectedIcon != null) {
-            iconChanged(selectedIcon);
-          }
-        },
-        icon: Icon(AccessoryIconModel.mapIcon(icon)),
-      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.4,
+              maxChildSize: 0.95,
+              expand: false,
+              builder: (context, scrollController) {
+                return Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('选择图标', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView(
+                        controller: scrollController,
+                        children: categories.map((cat) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Text(
+                                  cat['category'] as String,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: (cat['icons'] as List<Map<String, dynamic>>).map((icon) {
+                                  final iconName = icon['name'] as String;
+                                  final isMaterialIcon = iconName != 'custom';
+                                  // 修复空安全：使用 selectedIcon?.startsWith()
+                                  final isSelected = selectedIcon != null &&
+                                      ((isMaterialIcon && icon['icon'].toString() == selectedIcon) ||
+                                          (iconName == 'custom' && selectedIcon!.startsWith('file')));
+
+                                  if (iconName == 'custom') {
+                                    return GestureDetector(
+                                      onTap: () async {
+                                        final picker = ImagePicker();
+                                        final picked = await picker.pickImage(source: ImageSource.gallery);
+                                        if (picked != null) {
+                                          setState(() {
+                                            selectedIcon = picked.path;
+                                          });
+                                          Navigator.pop(context, selectedIcon);
+                                        }
+                                      },
+                                      child: Container(
+                                        width: 56,
+                                        height: 56,
+                                        margin: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+                                              : Colors.grey.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: isSelected
+                                              ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+                                              : null,
+                                        ),
+                                        child: const Icon(Icons.add_a_photo, size: 30),
+                                      ),
+                                    );
+                                  } else {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          selectedIcon = icon['icon'].toString();
+                                        });
+                                        Navigator.pop(context, selectedIcon);
+                                      },
+                                      child: Container(
+                                        width: 56,
+                                        height: 56,
+                                        margin: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+                                              : Colors.grey.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: isSelected
+                                              ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+                                              : null,
+                                        ),
+                                        child: Icon(
+                                          icon['icon'] as IconData,
+                                          size: 30,
+                                          color: isSelected
+                                              ? Theme.of(context).colorScheme.primary
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

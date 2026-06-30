@@ -16,10 +16,14 @@ class DashboardMobile extends StatefulWidget {
 }
 
 class _DashboardMobileState extends State<DashboardMobile> {
+  final GlobalKey<AccessoryMapListVerticalState> _mapListKey =
+  GlobalKey<AccessoryMapListVerticalState>();
+
   late final List<Map<String, dynamic>> _tabs = [
     {
       'title': '我的配件',
       'body': (ctx) => AccessoryMapListVertical(
+        key: _mapListKey,
         loadLocationUpdates: loadLocationUpdates,
       ),
       'icon': Icons.place,
@@ -33,6 +37,8 @@ class _DashboardMobileState extends State<DashboardMobile> {
       'actionButton': (ctx) => const NewKeyAction(),
     },
   ];
+
+  bool _hasFocused = false;
 
   @override
   void initState() {
@@ -51,16 +57,23 @@ class _DashboardMobileState extends State<DashboardMobile> {
     var accessoryRegistry = Provider.of<AccessoryRegistry>(context, listen: false);
     try {
       await accessoryRegistry.loadLocationReports();
+      // 数据加载完成后，自动聚焦到第一个配件
+      if (mounted && !_hasFocused) {
+        _mapListKey.currentState?.focusOnFirstAccessory();
+        _hasFocused = true;
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Theme.of(context).colorScheme.error,
-          content: Text(
-            '无法获取位置报告，请稍后重试',
-            style: TextStyle(color: Theme.of(context).colorScheme.onError),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            content: Text(
+              '无法获取位置报告，请稍后重试',
+              style: TextStyle(color: Theme.of(context).colorScheme.onError),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 

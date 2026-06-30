@@ -12,7 +12,7 @@ class Pair<T1, T2> {
   Pair(this.a, this.b);
 }
 
-const defaultIcon = Icons.push_pin;
+const defaultIcon = 'push_pin';
 
 class Accessory {
   String id;
@@ -25,7 +25,7 @@ class Accessory {
   String? oldestRelevantSymmetricKey;
 
   String name;
-  String _icon;
+  String _icon;      // 字符串（Material 图标名、路径或 URL）
   Color color;
 
   bool isActive;
@@ -37,11 +37,8 @@ class Accessory {
   List<Pair<LatLng, DateTime>> locationHistory = [];
   Future<Placemark?> place = Future.value(null);
 
-  // 用于匹配报告 id 的哈希公钥列表（从 keysMap 提取）
   List<String> additionalKeys;
-  // 用于发送查询的原始密钥（与前端一致）
   List<String> queryKeys;
-  // 蓝牙 MAC 地址，用于信号导航
   String macAddress;
 
   Accessory({
@@ -52,7 +49,7 @@ class Accessory {
     this.isActive = false,
     this.isDeployed = false,
     LatLng? lastLocation,
-    String icon = 'mappin',
+    String icon = 'push_pin',
     this.color = Colors.grey,
     this.usesDerivation = false,
     this.symmetricKey,
@@ -130,14 +127,13 @@ class Accessory {
     }
   }
 
-  /// 添加一个位置点（自动转换坐标）
   void addLocationPoint(LatLng wgsPoint, DateTime time) {
     final gcj = CoordinateConverter.wgs84ToGcj02(
         wgsPoint.longitude, wgsPoint.latitude);
     locationHistory.add(Pair(LatLng(gcj[1], gcj[0]), time));
   }
 
-  /// 直接设置 GCJ-02 坐标的最新位置（跳过转换）
+  /// 直接设置已转换的 GCJ-02 坐标，避免二次转换
   void setLastLocationGCJ(LatLng gcjPoint, DateTime time) {
     _lastLocation = gcjPoint;
     datePublished = time;
@@ -146,11 +142,7 @@ class Accessory {
     }
   }
 
-  IconData get icon {
-    IconData? icon = AccessoryIconModel.mapIcon(_icon);
-    return icon ?? defaultIcon;
-  }
-
+  String get icon => _icon;
   String get rawIcon => _icon;
 
   setIcon(String icon) {
@@ -169,7 +161,7 @@ class Accessory {
             : null,
         isActive = json['isActive'] ?? false,
         isDeployed = json['isDeployed'] ?? false,
-        _icon = json['icon'] ?? 'mappin',
+        _icon = json['icon'] ?? 'push_pin',
         color = json['color'] != null
             ? Color(int.parse(json['color'], radix: 16))
             : Colors.grey,
@@ -187,7 +179,6 @@ class Accessory {
             .toList() ??
             [],
         macAddress = json['macAddress'] ?? '' {
-    // fromJson 加载存储数据，数据已经是 GCJ-02，不再转换
     if (_lastLocation != null) {
       place = LocationModel.getAddress(_lastLocation!);
     }

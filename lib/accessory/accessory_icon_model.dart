@@ -1,39 +1,64 @@
 import 'package:flutter/material.dart';
 
 class AccessoryIconModel {
-  /// A list of all available icons
-  static const List<String> icons = [
-    "creditcard.fill", "briefcase.fill", "case.fill", "latch.2.case.fill",
-    "key.fill", "mappin", "globe", "crown.fill",
-    "gift.fill", "car.fill", "bicycle", "figure.walk",
-    "heart.fill", "hare.fill", "tortoise.fill", "eye.fill",
+  static const List<Map<String, dynamic>> icons = [
+    // 设备
+    {'icon': Icons.phone_android, 'name': 'phone_android', 'category': '设备'},
+    {'icon': Icons.laptop, 'name': 'laptop', 'category': '设备'},
+    {'icon': Icons.watch, 'name': 'watch', 'category': '设备'},
+    {'icon': Icons.headphones, 'name': 'headphones', 'category': '设备'},
+    {'icon': Icons.tablet, 'name': 'tablet', 'category': '设备'},
+    {'icon': Icons.speaker, 'name': 'speaker', 'category': '设备'},
+    {'icon': Icons.camera_alt, 'name': 'camera_alt', 'category': '设备'},
+    // 出行
+    {'icon': Icons.directions_car, 'name': 'directions_car', 'category': '出行'},
+    {'icon': Icons.motorcycle, 'name': 'motorcycle', 'category': '出行'},
+    {'icon': Icons.directions_bike, 'name': 'directions_bike', 'category': '出行'},
+    {'icon': Icons.flight, 'name': 'flight', 'category': '出行'},
+    {'icon': Icons.directions_bus, 'name': 'directions_bus', 'category': '出行'},
+    {'icon': Icons.train, 'name': 'train', 'category': '出行'},
+    // 物品
+    {'icon': Icons.work, 'name': 'work', 'category': '物品'},
+    {'icon': Icons.shopping_bag, 'name': 'shopping_bag', 'category': '物品'},
+    {'icon': Icons.key, 'name': 'key', 'category': '物品'},
+    {'icon': Icons.wallet, 'name': 'wallet', 'category': '物品'},
+    {'icon': Icons.backpack, 'name': 'backpack', 'category': '物品'},
+    {'icon': Icons.luggage, 'name': 'luggage', 'category': '物品'},
+    {'icon': Icons.umbrella, 'name': 'umbrella', 'category': '物品'},
+    // 宠物/人
+    {'icon': Icons.pets, 'name': 'pets', 'category': '宠物'},
+    {'icon': Icons.person, 'name': 'person', 'category': '宠物'},
+    {'icon': Icons.child_care, 'name': 'child_care', 'category': '宠物'},
+    // 默认
+    {'icon': Icons.push_pin, 'name': 'push_pin', 'category': '默认'},
   ];
 
-  /// A mapping from the cupertino icon names to the material icon names.
-  /// 
-  /// If the icons do not match, so a similar replacement is used.
-  static const iconMapping = {
-    'creditcard.fill': Icons.credit_card,
-    'briefcase.fill': Icons.business_center,
-    'case.fill': Icons.work,
-    'latch.2.case.fill': Icons.business_center,
-    'key.fill': Icons.vpn_key,
-    'mappin': Icons.place,
-    // 'pushpin': Icons.push_pin,
-    'globe': Icons.language,
-    'crown.fill': Icons.school,
-    'gift.fill': Icons.redeem,
-    'car.fill': Icons.directions_car,
-    'bicycle': Icons.pedal_bike,
-    'figure.walk': Icons.directions_walk,
-    'heart.fill': Icons.favorite,
-    'hare.fill': Icons.pets,
-    'tortoise.fill': Icons.bug_report,
-    'eye.fill': Icons.visibility,
-  };
+  static IconData? mapIcon(String? iconName) {
+    if (iconName == null || iconName.isEmpty) return null;
+    if (iconName.startsWith('http') || iconName.startsWith('file') || iconName.startsWith('/') || iconName.startsWith('assets/')) {
+      return null; // 自定义图片，不是 Material icon
+    }
+    for (var iconMap in icons) {
+      if (iconMap['name'] == iconName || iconMap['icon'].toString() == iconName) {
+        return iconMap['icon'] as IconData;
+      }
+    }
+    return null;
+  }
 
-  /// Looks up the equivalent material icon for the cupertino icon [iconName].
-  static IconData? mapIcon(String iconName) {
-    return iconMapping[iconName];
+  static List<Map<String, dynamic>> getIconsByCategory() {
+    final categories = <String, List<Map<String, dynamic>>>{};
+    for (var icon in icons) {
+      final cat = icon['category'] as String;
+      if (!categories.containsKey(cat)) {
+        categories[cat] = [];
+      }
+      categories[cat]!.add(icon);
+    }
+    // 添加“自定义”类别
+    categories['自定义'] = [
+      {'icon': Icons.add_a_photo, 'name': 'custom', 'category': '自定义'}
+    ];
+    return categories.entries.map((e) => {'category': e.key, 'icons': e.value}).toList();
   }
 }

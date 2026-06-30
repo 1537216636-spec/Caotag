@@ -52,108 +52,106 @@ class _AccessoryListState extends State<AccessoryList> {
           return const NoAccessoriesPlaceholder();
         }
 
+        // 去掉 RefreshIndicator，直接返回可滚动列表
         return SlidableAutoCloseBehavior(
-          child: RefreshIndicator(
-            onRefresh: widget.loadLocationUpdates,
-            child: Scrollbar(
-              child: ListView(
-                padding: const EdgeInsets.only(bottom: 16),
-                children: accessories.map((accessory) {
-                  Widget? trailing;
-                  if (locationModel.here != null && accessory.lastLocation != null) {
-                    const Distance distance = Distance();
-                    final double km = distance.as(LengthUnit.Kilometer, locationModel.here!, accessory.lastLocation!);
-                    trailing = Text('${km.toStringAsFixed(1)} km');
-                  }
+          child: Scrollbar(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 16),
+              children: accessories.map((accessory) {
+                Widget? trailing;
+                if (locationModel.here != null && accessory.lastLocation != null) {
+                  const Distance distance = Distance();
+                  final double km = distance.as(LengthUnit.Kilometer, locationModel.here!, accessory.lastLocation!);
+                  trailing = Text('${km.toStringAsFixed(1)} km');
+                }
 
-                  return Slidable(
-                    endActionPane: ActionPane(
-                      motion: const BehindMotion(),
-                      extentRatio: 0.65,   // 确保三个按钮完整显示
-                      children: [
-                        if (accessory.isDeployed && accessory.lastLocation != null)
-                          _buildSlidableAction(
-                            icon: Icons.directions,
-                            label: '导航',
-                            gradient: const LinearGradient(colors: [Color(0xFF007AFF), Color(0xFF0060DF)]),
-                            onTap: (ctx) async {
-                              final lat = accessory.lastLocation!.latitude;
-                              final lon = accessory.lastLocation!.longitude;
-                              final url = 'https://uri.amap.com/marker?position=$lon,$lat&name=${Uri.encodeComponent(accessory.name)}';
-                              if (await canLaunchUrl(Uri.parse(url))) {
-                                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                              } else {
-                                await MapsLauncher.launchCoordinates(lat, lon, accessory.name);
-                              }
-                              Slidable.of(ctx)?.close();
-                            },
-                          ),
-                        if (accessory.isDeployed)
-                          _buildSlidableAction(
-                            icon: Icons.route,
-                            label: '轨迹',
-                            gradient: const LinearGradient(colors: [Color(0xFFFF9500), Color(0xFFE68600)]),
-                            onTap: (ctx) {
-                              Navigator.push(
-                                ctx,
-                                MaterialPageRoute(
-                                  builder: (context) => AccessoryTrackPage(accessory: accessory),
-                                ),
-                              );
-                              Slidable.of(ctx)?.close();
-                            },
-                          ),
-                        if (accessory.isDeployed && accessory.macAddress.isNotEmpty)
-                          _buildSlidableAction(
-                            icon: Icons.bluetooth_searching,
-                            label: '搜索',
-                            gradient: const LinearGradient(colors: [Color(0xFF30D158), Color(0xFF28B04B)]),
-                            onTap: (ctx) {
-                              Navigator.push(
-                                ctx,
-                                MaterialPageRoute(
-                                  builder: (context) => BleNavigator(
-                                    targetMac: accessory.macAddress,
-                                    deviceName: accessory.name,
-                                  ),
-                                ),
-                              );
-                              Slidable.of(ctx)?.close();
-                            },
-                          ),
-                        if (!accessory.isDeployed)
-                          _buildSlidableAction(
-                            icon: Icons.upload_file,
-                            label: '部署',
-                            gradient: const LinearGradient(colors: [Color(0xFF007AFF), Color(0xFF5856D6)]),
-                            onTap: (ctx) {
-                              var registry = Provider.of<AccessoryRegistry>(ctx, listen: false);
-                              var newAccessory = accessory.clone();
-                              newAccessory.isDeployed = true;
-                              registry.editAccessory(accessory, newAccessory);
-                              Slidable.of(ctx)?.close();
-                            },
-                          ),
-                      ],
-                    ),
-                    child: Builder(
-                      builder: (context) {
-                        return AccessoryListItem(
-                          accessory: accessory,
-                          distance: trailing,
-                          herePlace: locationModel.herePlace,
-                          onTap: () {
-                            if (accessory.lastLocation != null) {
-                              widget.centerOnPoint?.call(accessory.lastLocation!);
+                return Slidable(
+                  endActionPane: ActionPane(
+                    motion: const BehindMotion(),
+                    extentRatio: 0.65,
+                    children: [
+                      if (accessory.isDeployed && accessory.lastLocation != null)
+                        _buildSlidableAction(
+                          icon: Icons.directions,
+                          label: '导航',
+                          gradient: const LinearGradient(colors: [Color(0xFF007AFF), Color(0xFF0060DF)]),
+                          onTap: (ctx) async {
+                            final lat = accessory.lastLocation!.latitude;
+                            final lon = accessory.lastLocation!.longitude;
+                            final url = 'https://uri.amap.com/marker?position=$lon,$lat&name=${Uri.encodeComponent(accessory.name)}';
+                            if (await canLaunchUrl(Uri.parse(url))) {
+                              await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                            } else {
+                              await MapsLauncher.launchCoordinates(lat, lon, accessory.name);
                             }
+                            Slidable.of(ctx)?.close();
                           },
-                          onLongPress: Slidable.of(context)?.openEndActionPane,
-                        );
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
+                        ),
+                      if (accessory.isDeployed)
+                        _buildSlidableAction(
+                          icon: Icons.route,
+                          label: '轨迹',
+                          gradient: const LinearGradient(colors: [Color(0xFFFF9500), Color(0xFFE68600)]),
+                          onTap: (ctx) {
+                            Navigator.push(
+                              ctx,
+                              MaterialPageRoute(
+                                builder: (context) => AccessoryTrackPage(accessory: accessory),
+                              ),
+                            );
+                            Slidable.of(ctx)?.close();
+                          },
+                        ),
+                      if (accessory.isDeployed && accessory.macAddress.isNotEmpty)
+                        _buildSlidableAction(
+                          icon: Icons.bluetooth_searching,
+                          label: '搜索',
+                          gradient: const LinearGradient(colors: [Color(0xFF30D158), Color(0xFF28B04B)]),
+                          onTap: (ctx) {
+                            Navigator.push(
+                              ctx,
+                              MaterialPageRoute(
+                                builder: (context) => BleNavigator(
+                                  targetMac: accessory.macAddress,
+                                  deviceName: accessory.name,
+                                ),
+                              ),
+                            );
+                            Slidable.of(ctx)?.close();
+                          },
+                        ),
+                      if (!accessory.isDeployed)
+                        _buildSlidableAction(
+                          icon: Icons.upload_file,
+                          label: '部署',
+                          gradient: const LinearGradient(colors: [Color(0xFF007AFF), Color(0xFF5856D6)]),
+                          onTap: (ctx) {
+                            var registry = Provider.of<AccessoryRegistry>(ctx, listen: false);
+                            var newAccessory = accessory.clone();
+                            newAccessory.isDeployed = true;
+                            registry.editAccessory(accessory, newAccessory);
+                            Slidable.of(ctx)?.close();
+                          },
+                        ),
+                    ],
+                  ),
+                  child: Builder(
+                    builder: (context) {
+                      return AccessoryListItem(
+                        accessory: accessory,
+                        distance: trailing,
+                        herePlace: locationModel.herePlace,
+                        onTap: () {
+                          if (accessory.lastLocation != null) {
+                            widget.centerOnPoint?.call(accessory.lastLocation!);
+                          }
+                        },
+                        onLongPress: Slidable.of(context)?.openEndActionPane,
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
             ),
           ),
         );
