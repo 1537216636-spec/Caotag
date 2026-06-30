@@ -39,17 +39,29 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 
-	<!-- 隐私权限描述 -->
+	<!-- ===== 隐私权限描述 ===== -->
+	<!-- 蓝牙 -->
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>需要使用蓝牙来搜索附近的追踪设备，并播放声音帮助您找到它。</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>需要使用蓝牙来连接追踪设备并控制声音。</string>
+
+	<!-- 定位 -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>需要获取您的位置以在地图上显示配件与您的距离。</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>需要持续获取位置以记录配件的移动轨迹。</string>
+
+	<!-- 相机 -->
 	<key>NSCameraUsageDescription</key>
 	<string>需要使用摄像头扫描二维码导入配件密钥。</string>
+
+	<!-- ✅ 相册（新增） -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>此应用需要访问您的相册，以便选择和上传图片。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>此应用需要保存图片到您的相册。</string>
+	<!-- ======================== -->
 
 	<!-- 后台模式：支持后台位置更新和蓝牙 -->
 	<key>UIBackgroundModes</key>
